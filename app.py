@@ -5,19 +5,22 @@ from datetime import datetime, timedelta
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
-
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL').replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['CACHE_TIMEOUT'] = 300  # Добавлено!
 db = SQLAlchemy(app)
 
 
 class ConversionHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Float, nullable=False)
-    from_curr = db.Column(db.String(3), nullable=False)
-    to_curr = db.Column(db.String(3), nullable=False)
-    result = db.Column(db.Float, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.now)
+    amount = db.Column(db.Float)
+    from_curr = db.Column(db.String(3))
+    to_curr = db.Column(db.String(3))
+    result = db.Column(db.Float)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+with app.app_context():
+    db.create_all()
 
 def get_currency_rates():
     """Получение курсов валют с кэшированием"""
