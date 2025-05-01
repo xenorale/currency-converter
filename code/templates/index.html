@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер валют</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .currency-select { max-width: 300px; }
+        .conversion-result { background-color: #f8f9fa; border-radius: 5px; }
+        .history-list { max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Конвертер валют</h1>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="card shadow-sm mx-auto" style="max-width: 800px;">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <input type="number" class="form-control"
+                                   name="amount"
+                                   placeholder="Сумма"
+                                   step="0.01"
+                                   required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <select class="form-select currency-select" name="from">
+                                <option value="RUB">Российский рубль (RUB)</option>
+                                {% for code, currency in currencies %}
+                                <option value="{{ code }}">{{ currency['Name'] }} ({{ code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-1 text-center">
+                            <span class="fs-4">→</span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <select class="form-select currency-select" name="to">
+                                <option value="RUB">Российский рубль (RUB)</option>
+                                {% for code, currency in currencies %}
+                                <option value="{{ code }}">{{ currency['Name'] }} ({{ code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 text-center mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Конвертировать
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if result %}
+                <div class="conversion-result p-4 mt-4">
+                    <h4 class="text-center mb-3">Результат конвертации:</h4>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <p class="lead">
+                                {{ result.amount }} {{ result.from }} =
+                                <strong>{{ result.result }}</strong> {{ result.to }}
+                            </p>
+                            <p class="text-muted small">
+                                Курс: 1 {{ result.from }} = {{ result.rate }} {{ result.to }}
+                                <br>
+                                <em>Обновлено: {{ update_date }}</em>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Последние операции:</h5>
+                        <ul class="list-group history-list">
+                            {% for entry in history %}
+                            <li class="list-group-item">
+                                {{ entry.amount }} {{ entry.from_curr }} → {{ entry.result }} {{ entry.to_curr }}
+                                <small class="text-muted">{{ entry.timestamp.strftime('%d.%m.%Y %H:%M') }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
