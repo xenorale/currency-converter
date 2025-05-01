@@ -1,1 +1,0 @@
-web: gunicorn app.py:Flask(__name__)
